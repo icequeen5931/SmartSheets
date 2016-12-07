@@ -2,69 +2,69 @@ __author__ = 'jpisano'
 
 import mysql.connector
 
-cnx = mysql.connector.connect(user='root', password='Wdst12498', host='localhost', database='ref_db')
+cnx = mysql.connector.connect(user='root', password='Wdst12498', host='localhost', database='cust_ref_db')
 mycursor = cnx.cursor()
 
-cnx1 = mysql.connector.connect(user='root', password='Wdst12498', host='localhost', database='ref_db')
+cnx1 = mysql.connector.connect(user='root', password='Wdst12498', host='localhost', database='cust_ref_db')
 mycursor1 = cnx1.cursor()
 
-path_to_import = 'c:/users/jpisano/desktop/ACI to Production Database/Todays Data/'
-file_to_import = 'fy16_bookings_data.csv'
+# path_to_import = 'c:/users/jpisano/desktop/ACI to Production Database/Todays Data/'
+# file_to_import = 'fy16_bookings_data.csv'
 
 #Check Table Sizes
-mycursor.execute("SELECT COUNT(*) FROM fy15_bookings_data")
-print("fy15 Bookings Data: ", mycursor.fetchone())
-
-mycursor.execute("SELECT COUNT(*) FROM fy16_bookings_data")
-print("fy16 Bookings Data: ",  mycursor.fetchone())
-
-mycursor.execute("SELECT COUNT(*) FROM master_bookings_data")
-print("Master Bookings Data: ", mycursor.fetchone())
-
+# mycursor.execute("SELECT COUNT(*) FROM fy15_bookings_data")
+# print("fy15 Bookings Data: ", mycursor.fetchone())
+#
+# mycursor.execute("SELECT COUNT(*) FROM fy16_bookings_data")
+# print("fy16 Bookings Data: ",  mycursor.fetchone())
+#
+# mycursor.execute("SELECT COUNT(*) FROM master_bookings_data")
+# print("Master Bookings Data: ", mycursor.fetchone())
+#
 mycursor.execute("SELECT COUNT(*) FROM master_customer_data")
 current_customers = mycursor.fetchone()
 print("Master Customer Data: ", current_customers[0])
-
-mycursor.execute("SELECT COUNT(*) FROM prev_master_customer_data")
-print("Previous Master Customer Data: ",  mycursor.fetchone())
+#
+# mycursor.execute("SELECT COUNT(*) FROM prev_master_customer_data")
+# print("Previous Master Customer Data: ",  mycursor.fetchone())
 
 #Clean out the FY16 table and master bookings data
-mycursor.execute("DELETE FROM fy16_bookings_data")
-cnx.commit()
-mycursor.execute("DELETE FROM master_bookings_data")
-cnx.commit()
+# mycursor.execute("DELETE FROM fy16_bookings_data")
+# cnx.commit()
+#mycursor.execute("DELETE FROM master_bookings_data")
+#cnx.commit()
 
 #Add in fresh Bookings Data
-full_path = path_to_import + file_to_import
-sql = ("LOAD DATA LOCAL INFILE " + "'" + full_path + "'"
-       " INTO TABLE fy16_bookings_data FIELDS TERMINATED BY ','"
-       " ENCLOSED BY '" + '"' + "' ESCAPED BY " + "'" + "'"
-       " LINES TERMINATED BY '" + "\r\n" + "'")
-mycursor.execute(sql)
-cnx.commit()
+# full_path = path_to_import + file_to_import
+# sql = ("LOAD DATA LOCAL INFILE " + "'" + full_path + "'"
+#        " INTO TABLE fy16_bookings_data FIELDS TERMINATED BY ','"
+#        " ENCLOSED BY '" + '"' + "' ESCAPED BY " + "'" + "'"
+#        " LINES TERMINATED BY '" + "\r\n" + "'")
+# mycursor.execute(sql)
+# cnx.commit()
 
 #INSERT fy15_bookings into the master
-sql = ('INSERT INTO master_bookings_data'
-       ' SELECT fy15_bookings_data.* FROM fy15_bookings_data')
-mycursor.execute(sql)
-cnx.commit()
+# sql = ('INSERT INTO master_bookings_data'
+#        ' SELECT fy15_bookings_data.* FROM fy15_bookings_data')
+# mycursor.execute(sql)
+# cnx.commit()
 
 #INSERT fy16_bookings into the master
-sql = ('INSERT INTO master_bookings_data'
-       ' SELECT fy16_bookings_data.* FROM fy16_bookings_data')
-mycursor.execute(sql)
-cnx.commit()
+# sql = ('INSERT INTO master_bookings_data'
+#        ' SELECT fy16_bookings_data.* FROM fy16_bookings_data')
+# mycursor.execute(sql)
+# cnx.commit()
 
 #Backup and copy master_customer_data to prev_master_customer_data
-mycursor.execute('DELETE FROM prev_master_customer_data')
-cnx.commit()
-sql = "INSERT prev_master_customer_data SELECT * FROM master_customer_data"
-mycursor.execute(sql)
-cnx.commit()
+# mycursor.execute('DELETE FROM prev_master_customer_data')
+# cnx.commit()
+# sql = "INSERT prev_master_customer_data SELECT * FROM master_customer_data"
+# mycursor.execute(sql)
+# cnx.commit()
 
 #Clean out the Master Customer Data table
-mycursor.execute("DELETE FROM master_customer_data")
-cnx.commit()
+#mycursor.execute("DELETE FROM master_customer_data")
+#cnx.commit()
 
 #Load the Team Coverage list
 mycursor.execute("SELECT * FROM team_coverage")
@@ -79,10 +79,15 @@ sql = ('SELECT * FROM `master_bookings_data` '
        'ORDER BY master_bookings_data.`End Customer Global Ultimate Name` ASC, `Date Booked` DESC')
 mycursor.execute(sql)
 
+#Loop through each of the master_bookings_data table
 #Load the first customer line item
 customer_line_item = mycursor.fetchone()
 
+progress = 0
+rec_cnt = 0
+
 while customer_line_item is not None:
+
     # Init per customer counters and variables
     current_customer = customer_line_item[16]
     current_customer_id = customer_line_item[17]
@@ -129,6 +134,7 @@ while customer_line_item is not None:
                     APIC_PID += 1
 
         #Get the next bookings line item
+        rec_cnt = rec_cnt + 1
         customer_line_item = mycursor.fetchone()
 
         #Kick out if this is the last item
@@ -194,11 +200,17 @@ while customer_line_item is not None:
 
     mycursor1.execute(sql)
     cnx1.commit()
+
+    progress = progress + 1
+    if progress%1000 == 0:
+            print ("Customer Processed: ", progress)
+
 cnx.commit()
 
 # print out some stats
 mycursor1.execute("SELECT COUNT(*) FROM master_customer_data")
 new_customers = mycursor1.fetchone()
+print("Bookings Records Processed: ",rec_cnt)
 print("Master Customer Data: ", new_customers[0])
 print("We have added: " + str(new_customers[0] - current_customers[0]) + " customers")
 
