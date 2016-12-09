@@ -13,7 +13,7 @@ sql1 = ("(SELECT "
 		"'End Customer Global Ultimate Name',"
 		"'End Customer Global Ultimate Company Target ID',"
 		"'Qty of N9300 PIDs ordered',"
-		"'Qty of N9500 PIDs ordered',";
+		"'Qty of N9500 PIDs ordered',"
 		"'Qty of APIC PIDs ordered',"
 		"'Qty of C3 PIDs ordered',"
 		"'Qty of NFM PIDs ordered',"
