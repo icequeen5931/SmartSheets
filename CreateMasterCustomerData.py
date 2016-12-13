@@ -156,8 +156,8 @@ while customer_line_item is not None:
         '"' + sales_lv4 + '",'  # Sales Level 4
         '"' + sales_lv5 + '",'  # Sales Level 5
         '"' + str(first_date_booked != last_date_booked) + '",'  # Multiple Bookings
-        '"' + first_date_booked + '",'  # First Date Booked
-        '"' + last_date_booked + '",'  # Last Date Booked
+        '"' + str(first_date_booked) + '",'  # First Date Booked
+        '"' + str(last_date_booked) + '",'  # Last Date Booked
         '"Last Refresh")')
 
     mycursor1.execute(sql)
