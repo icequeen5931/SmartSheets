@@ -38,7 +38,6 @@ while smartsheet_customer_line_item is not None:
        if mycursor1.rowcount == 0 :
               #Handle error here if we don't find the customer
               print ("None found: ", smartsheet_customer_name, mycursor1.rowcount)
-              print(sql)
        elif mycursor1.rowcount > 1:
               # Handle error here if we find more than one customer
               print("More than one: ",smartsheet_customer_name, mycursor1.rowcount)

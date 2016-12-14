@@ -12,6 +12,42 @@ mycursor.execute("SELECT COUNT(*) FROM master_customer_data")
 current_customers = mycursor.fetchone()
 print("Master Customer Data: ", current_customers[0])
 
+sql = "DROP TABLE master_customer_data"
+mycursor.execute(sql)
+print("Deleted OLD Master Customer Data...")
+cnx.commit()
+
+sql = ('CREATE TABLE master_customer_data ('
+         '`End Customer Global Ultimate Name` TEXT,'
+         '`End Customer Global Ultimate Company Target ID` TEXT,'
+         '`Qty of N9300 PIDs ordered` TEXT,'
+         '`Qty of N9500 PIDs ordered` TEXT,'
+         '`Qty of APIC PIDs ordered` TEXT,'
+         '`Qty of C3 PIDs ordered` TEXT,'
+         '`Qty of NFM PIDs ordered` TEXT,'
+         '`Qty of Tetration PIDs ordered` TEXT,'
+         '`Sales Agent Name` TEXT,'
+         '`Assigned PSS` TEXT,'
+         '`Assigned TSA` TEXT,'
+         '`Reference Customer ?` TEXT,'
+         '`Target as ACI to Production by end of Q1 ?` TEXT,'
+         '`Equipment Status ?` TEXT,'
+         '`Next Steps` TEXT,'
+         '`Customer Vertical` TEXT,'
+         '`Target for Competitive Pursuit ?` TEXT,'
+         '`Other PSS` TEXT,'
+         '`Sales Level 1` TEXT,'
+         '`Sales Level 2` TEXT,'
+         '`Sales Level 3` TEXT,'
+         '`Sales Level 4` TEXT,'
+         '`Sales Level 5` TEXT,'
+         '`MultipleBookings` TEXT,'
+         '`FirstDateBooked` DATE,'
+         '`LastDateBooked` DATE,'
+         '`Last Refresh` TEXT)')
+mycursor.execute(sql)
+cnx.commit()
+
 #Load the Team Coverage list
 mycursor.execute("SELECT * FROM team_coverage")
 team_coverage = mycursor.fetchall()
@@ -22,7 +58,7 @@ product_ids = mycursor.fetchall()
 
 #Loop through the fresh master_bookings_data and create a new Summary of master_customer_data
 sql = ('SELECT * FROM `master_bookings_data` '
-       'ORDER BY master_bookings_data.`End Customer Global Ultimate Name` ASC, `Date Booked` DESC')
+       'ORDER BY master_bookings_data.`End Customer Global Ultimate Name` ASC, `Date Booked` ASC')
 mycursor.execute(sql)
 
 #Loop through each of the master_bookings_data table

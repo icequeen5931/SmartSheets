@@ -62,7 +62,7 @@ cnx.commit()
 print("Importing NEW Bookings Data...")
 sql = ("load data local infile 'C:/Users/jpisano/Desktop/ACI to Production Database - Beta/Todays Data/FY17_Daily_Bookings_Nexus_9K_as of_12_7_16.csv' into table todays_bookings_data "
         "fields terminated by ',' "
-	    "enclosed by '" + '"' + "' "
+	    "enclosed by '\"' "
         "escaped by '' "
         "lines terminated by '\r\n' ")
 mycursor.execute(sql)
