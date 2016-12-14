@@ -7,10 +7,13 @@ mycursor = cnx.cursor()
 
 cnx1 = mysql.connector.connect(user='root', password='Wdst12498', host='localhost', database='cust_ref_db')
 mycursor1 = cnx1.cursor()
-
+/
 mycursor.execute("SELECT COUNT(*) FROM master_customer_data")
 current_customers = mycursor.fetchone()
 print("Master Customer Data: ", current_customers[0])
+
+sql = ("ALTER TABLE master_customer_data_as_of_12_7_2016 "
+        "RENAME TO  master_customer_data_as_of_12_7_2016;")
 
 sql = "DROP TABLE master_customer_data"
 mycursor.execute(sql)

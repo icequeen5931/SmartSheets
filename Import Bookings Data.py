@@ -6,11 +6,13 @@ from my_functions import csv_from_excel
 cnx = mysql.connector.connect(user='root', password='Wdst12498', host='localhost', database='cust_ref_db')
 mycursor = cnx.cursor()
 
+#
 sql = "DROP TABLE master_bookings_data"
 mycursor.execute(sql)
 print("Deleted OLD Master Bookings Data...")
 cnx.commit()
 
+#
 sql = "DROP TABLE todays_bookings_data"
 mycursor.execute(sql)
 print("Deleted Daily Bookings Data...")
