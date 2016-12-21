@@ -3,95 +3,108 @@ import xlrd
 import csv
 import hashlib
 import datetime
+import os
+import zipfile
 
 # a change
-
-def csv_from_excel(path_to_import,file_to_import):
+def csv_from_excel(working_dir,working_file):
     #This function reads an excel sheet and creates a CSV file
-    excel_file = path_to_import + file_to_import
-    print ("Opening Workbook")
-    workbook = xlrd.open_workbook(excel_file)
-    print ("Workbook Opened")
 
-    #xlrd.dump(excel_file,ijm)
-    all_worksheets = workbook.sheet_names()
-    #print ("Sheets - >>>>  ",all_worksheets)
-    print(workbook.nsheets)
+    your_csv_file = open(''.join([working_dir + working_file.replace(".xlsx",""), '.csv']), 'w',newline='')
+    print ('Your CSV file: ',your_csv_file)
+    wr = csv.writer(your_csv_file, quoting=csv.QUOTE_ALL)
 
-    #Loop through all the worksheets
-    for worksheet_name in all_worksheets:
-        worksheet = workbook.sheet_by_name(worksheet_name)
-        print(file_to_import.replace(".xlsx",""))
-        your_csv_file = open(''.join([path_to_import + file_to_import.replace(".xlsx",""), '.csv']), 'w',newline='')
+    wb= xlrd.open_workbook(working_dir + working_file)
+    print("Workbook Opened: ",working_file)
 
-        #print("CSV File Name - >>> ", your_csv_file.name)
-        #print()
+    ws = wb.sheets()
 
-        wr = csv.writer(your_csv_file, quoting=csv.QUOTE_ALL)
-
-        #Loop through each row in the current worksheet
-        for rownum in range(worksheet.nrows):
-            csv_row = []
-            for raw_entry in worksheet.row_values(rownum):
-                #print("Cleaned up:  ", raw_entry," ",type(raw_entry))
-
-                #make it a string and strip out embedded NL CR and Tabs
-                tmp_str = str(raw_entry)
-                tmp_str = tmp_str.replace('\n',' ').replace('\r',' ').replace('\t',' ')
-                csv_row.append(tmp_str)
-                #print ("Cleaned up:  ", tmp_str)
-                #print ("CSV Row:  ", csv_row)
-
-            #Loop thru all cells and find chars > 127
+    for sheet in ws:
+        rows = sheet.get_rows()
+        row_idx = -1
+        for row in rows :
             output_row = []
             row_string = ''
-#
-            #loop over each cell in the row
-            cellnum = 0
+            row_idx += 1
 
-            for cell in csv_row:
-                output_cell = ''
-                cellnum = cellnum + 1
-                #print(rownum,cellnum,cell)
-
-                #loop over each char in the cell
-                #look for any ascii character > 127
-                #replace with a ? (question mark)
-                for char in cell:
-                    tmp = char
-                    if ord(char) > 127:
-                        #print("rownum: ",rownum, " found bad char: ",cell,tmp_str,char,ord(char))
-                        tmp = chr(63)
-                    output_cell = output_cell + tmp
-
-                #If this Column cell contains a date convert it from an Excel Float to a date
-                if rownum > 0 and cellnum == 5:
-                    #print (rownum,cell)
-
-                    #since this is a date turn it back to a float
-                    cell = float(cell)
-
+            for cell in row:
+                value = cell.value
+                if cell.ctype == xlrd.XL_CELL_DATE :
                     # 61 is the lowest Excel Date we can have due to leap year issues
-                    if cell < 61:
-                        cell = 61
+                    if value < 61:
+                        value = 61
+                    tmp_date = datetime.datetime(*xlrd.xldate_as_tuple(value, wb.datemode))
+                    value = tmp_date.strftime('%Y/%m/%d')
 
-                    #tmp_date = datetime.datetime(*xlrd.xldate_as_tuple(60., workbook.datemode))
-                    tmp_date = datetime.datetime(*xlrd.xldate_as_tuple(cell, workbook.datemode))
-                    #output_cell = tmp_date.strftime('%m/%d/%Y')
-                    output_cell = tmp_date.strftime('%Y/%m/%d')
-                    #print(workbook.datemode)
+                if cell.ctype == xlrd.XL_CELL_TEXT :
+                    # Strip out Unicode characters above value 127
+                    # Make it all ASCII
+                    cell_bytes = (cell.value).encode('ascii','ignore')
+                    value =cell_bytes.decode('utf-8')
 
-                row_string = row_string + output_cell
-                output_row.append(output_cell)
+                #Add this cell value to the output row list
+                row_string = row_string + str(value)
+                output_row.append(value)
 
-            #Add the Hash Value for the row_string
-            if rownum == 0:
+            # Add the Hash Value for this output_row
+            if row_idx == 0:
                 output_row.append('HashVal')
             else:
                 output_row.append(hashlib.md5(row_string.encode('utf-8')).hexdigest())
 
-            # Leave out the Header row
-            if rownum != 0:
-                wr.writerow([(str(entry)) for entry in output_row ])
+            # Write the output_row list to the CSV file
+            wr.writerow([(entry) for entry in output_row])
 
+    #Close up the CSV file and exit
     your_csv_file.close()
+
+
+
+
+
+
+
+
+
+
+def table_exists(mycursor,tbl_name):
+    sql = "SELECT * FROM information_schema.tables WHERE table_name = '"+ tbl_name + "'"
+    mycursor.execute(sql)
+    if mycursor.fetchone() != None:
+        return True
+    else:
+        return False
+
+def get_new_zip_file(download_dir, download_file, working_dir, working_file,timestamp):
+    # Is there a bookings file downloaded ?
+    if os.path.exists(download_dir + download_file):
+
+        # Does the working file exist ? if so let's rename it
+        if os.path.exists(working_dir):
+            try:
+                #Rename and timestamp the existing  file
+                base_name = os.path.splitext(working_file)[0]
+                ext_name = os.path.splitext(working_file)[1]
+                os.rename(working_dir + working_file, working_dir + base_name + timestamp + ext_name)
+                print()
+                print("Previous bookings data renamed to: " + base_name + timestamp + ext_name)
+            except FileNotFoundError as err:
+                print()
+                print("Just FYI - No existing file to rename")
+
+            #Unzip the file into the specified path
+            zip_ref = zipfile.ZipFile(download_dir + download_file)
+            zip_ref.extractall(working_dir)
+
+            # close out the zip file
+            zip_ref.close()
+
+            #timestamp and rename the downloaded bookings file
+            base_name = os.path.splitext(download_file)[0]
+            ext_name = os.path.splitext(download_file)[1]
+            os.rename(download_dir + download_file, download_dir +base_name + timestamp + ext_name)
+            print()
+            print("New Bookings Data File Ready !")
+    else:
+        print()
+        print('Bookings Data not yet downloaded. Please download current copy !')
