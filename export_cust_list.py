@@ -1,11 +1,13 @@
 __author__ = 'jpisano'
 
 import mysql.connector
+from my_functions import stamp_it
 import os
 from settings import app,database
 
 
-def export_cust_list():
+def export_cust_list(cust_seg,sales_level):
+
 	download_file = app['DOWNLOAD_FILE']
 	download_dir = app['DOWNLOAD_DIR']
 	working_dir = app['WORKING_DIR']
@@ -53,19 +55,50 @@ def export_cust_list():
 			"'LastDateBooked',"
 			"'Last Refresh')" )
 
-	sql2=(" UNION " + "(SELECT * FROM cust_ref_db.master_customer_data "
-		"INTO OUTFILE '" + working_dir + working_data_dir + "Customer_List.csv' "
+	if cust_seg == "*" :
+		where_clause = ''
+		cust_seg = 'ALL'
+		sales_level = ''
+	else:
+		where_clause = "WHERE `Sales Level "+ sales_level + "` = '" + cust_seg +"' "
+
+	sql2=(" UNION " + "(SELECT * FROM master_customer_data "+
+		where_clause +
+		"INTO OUTFILE '" + working_dir + working_data_dir + "Customer_List_" + cust_seg.replace(' ','_')+ ".csv' "
 		"FIELDS ENCLOSED BY '\"' "
 		"TERMINATED BY ',' "
 		"ESCAPED BY '' "
 		"LINES TERMINATED BY '\\r\\n');")
 
-	sql = sql1 + sql2
+	sql = sql1 +  sql2
 	mycursor.execute(sql)
 
 	mycursor.execute("SELECT COUNT(*) FROM master_customer_data")
 	current_customers = mycursor.fetchone()
 	print("Master Customer Data: ", current_customers[0])
 
+	stamp_it(working_dir + working_data_dir + "Customer_List_" + cust_seg.replace(' ','_')+ ".csv", as_of_date)
 	cnx.commit()
 	cnx.close()
+
+
+
+
+#Level 1
+# export_cust_list('Global Enterprise Theatre','1')
+# export_cust_list('GLOBAL SERVICE PROVIDER','1')
+# export_cust_list('APJ','1')
+# export_cust_list('Corp Adjustment','1')
+# export_cust_list('EMEAR-REGION','1')
+# export_cust_list('GREATER_CHINA','1')
+#
+# #Level 2
+export_cust_list('*','*')
+#export_cust_list('US COMMERCIAL','2')
+# export_cust_list('US PS Market Segment','2')
+# export_cust_list('GLOBAL ENTERPRISE SEGMENT','2')
+#export_cust_list('US ENTERPRISE','2')
+
+
+
+

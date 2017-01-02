@@ -82,6 +82,7 @@ def stamp_it(working_file,timestamp):
         add_ext = datetime.datetime.now()
         os.rename(working_file,base_name + timestamp + add_ext.strftime('_%H_%M_%S') + ext_name)
     else:
+        print (working_file,base_name,ext_name)
         os.rename(working_file, base_name + timestamp + ext_name)
 
 def get_new_zip_file(source_file,dest_file):
