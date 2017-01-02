@@ -1,6 +1,7 @@
 __author__ = 'jpisano'
 
 import mysql.connector
+from my_functions import table_exists
 from settings import app,database
 
 def create_master_customer_data():
@@ -12,18 +13,20 @@ def create_master_customer_data():
                                   database=database['DATABASE'])
     mycursor1 = cnx1.cursor()
 
+    if table_exists(mycursor,'master_customer_data'):
+        mycursor.execute("SELECT COUNT(*) FROM master_customer_data")
+        current_customers = mycursor.fetchone()
+        print("Master Customer Data: ", current_customers[0])
 
-    mycursor.execute("SELECT COUNT(*) FROM master_customer_data")
-    current_customers = mycursor.fetchone()
-    print("Master Customer Data: ", current_customers[0])
+        #sql = ("ALTER TABLE master_customer_data_as_of_1_2_2017 "
+        #        "RENAME TO  master_customer_data_as_of_1_2_2017;")
 
-    #sql = ("ALTER TABLE master_customer_data_as_of_1_2_2017 "
-    #        "RENAME TO  master_customer_data_as_of_1_2_2017;")
-
-    sql = "DROP TABLE master_customer_data"
-    mycursor.execute(sql)
-    print("Deleted OLD Master Customer Data...")
-    cnx.commit()
+        sql = "DROP TABLE master_customer_data"
+        mycursor.execute(sql)
+        print("Deleted OLD Master Customer Data...")
+        cnx.commit()
+    else:
+        current_customers = [0,]
 
     sql = ('CREATE TABLE master_customer_data ('
              '`End Customer Global Ultimate Name` TEXT,'
