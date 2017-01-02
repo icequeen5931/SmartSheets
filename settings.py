@@ -24,5 +24,3 @@ app = dict(
     AS_OF_DATE = datetime.now().strftime('_as_of_%m_%d_%Y')
 )
 
-
-#print(app["AS_OF_DATE"])
