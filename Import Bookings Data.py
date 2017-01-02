@@ -1,7 +1,6 @@
 __author__ = 'jpisano'
 
 import mysql.connector
-from my_functions import csv_from_excel
 
 cnx = mysql.connector.connect(user='root', password='Wdst12498', host='localhost', database='cust_ref_db')
 mycursor = cnx.cursor()
@@ -18,10 +17,10 @@ mycursor.execute(sql)
 print("Deleted Daily Bookings Data...")
 cnx.commit()
 
-print("Processing NEW Bookings Data...")
-path_to_import = 'c:/users/jpisano/desktop/ACI to Production Database - Beta/Todays Data/'
-file_to_import = 'FY17_Daily_Bookings_Nexus_9K_as of_12_7_16.xlsx'
-csv_from_excel(path_to_import,file_to_import)
+# print("Processing NEW Bookings Data...")
+# path_to_import = 'c:/users/jpisano/desktop/ACI to Production Database - Beta/Todays Data/'
+# file_to_import = 'FY17_Daily_Bookings_Nexus_9K_as of_12_7_16.xlsx'
+# csv_from_excel(path_to_import,file_to_import)
 
 sql = ('CREATE TABLE master_bookings_data '
     '(`Fiscal Year` TEXT,'
