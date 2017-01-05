@@ -3,6 +3,9 @@ __author__ = 'jpisano'
 import mysql.connector
 from my_functions import table_exists
 from settings import app,database
+from Coverage import Coverage
+import time
+
 
 def create_master_customer_data():
     cnx = mysql.connector.connect(user=database['USER'], password=database['PASSWORD'], host=database['HOST'],
@@ -17,9 +20,6 @@ def create_master_customer_data():
         mycursor.execute("SELECT COUNT(*) FROM master_customer_data")
         current_customers = mycursor.fetchone()
         print("Master Customer Data: ", current_customers[0])
-
-        #sql = ("ALTER TABLE master_customer_data_as_of_1_2_2017 "
-        #        "RENAME TO  master_customer_data_as_of_1_2_2017;")
 
         sql = "DROP TABLE master_customer_data"
         mycursor.execute(sql)
@@ -59,9 +59,8 @@ def create_master_customer_data():
     mycursor.execute(sql)
     cnx.commit()
 
-    #Load the Team Coverage list
-    mycursor.execute("SELECT * FROM coverage")
-    team_coverage = mycursor.fetchall()
+    #Create a the Team Coverage Object
+    my_coverage = Coverage()
 
     #Load the Product ID list
     mycursor.execute("SELECT * FROM pids")
@@ -98,43 +97,43 @@ def create_master_customer_data():
         EMBRANE_PID = 0
         TETR_PID = 0
 
-        #Look up PSS and TSA coverage for this customer
-        pss = ''
-        tsa = ''
-        for territory in team_coverage:
-            tmp = (territory[2] + territory[3] + territory[4] + territory[5] + territory[6]).strip()
-            tmp = tmp.replace('*','')
-            tmp_len = len(tmp)
-            tmp1 = sales_lv1 + sales_lv2 + sales_lv3 + sales_lv4 + sales_lv5
-
-            if tmp1.startswith (tmp, 0, tmp_len):
-                pss = territory[0]
-                tsa = territory[1]
-                break
+        #Find the team(s) that cover this customer in this territory
+        teams = my_coverage.find_team(sales_lv1 + sales_lv2 + sales_lv3 + sales_lv4 + sales_lv5)
+        pss = ' '.join(teams[0])
+        tsa = ' '.join(teams[1])
 
         #Loop through this customers bookings data until we get to the next customer
         while current_customer == customer_line_item[16]:
-
             #Last Date Booked
             last_date_booked = customer_line_item[4]
 
             #See if this product ID is interesting
             #We only count "interesting" PIDs
             for product_id in product_ids:
+
+                #Check Product Family
+                if product_id[0] == customer_line_item[14]:
+                    if customer_line_item[14] == "TETR":
+                        TETR_PID += 1
+                        break
+                    elif customer_line_item[14] == "C3":
+                        C3_PID += 1
+                        break
+
                 if product_id[1] == customer_line_item[15]:
                     #Capture PID totals
                     if customer_line_item[14] == "N9300":
                         n9300_PID += 1
+                        break
                     elif customer_line_item[14] == "N9500":
                         n9500_PID += 1
+                        break
                     elif customer_line_item[14] == "APIC":
                         APIC_PID += 1
-                    elif customer_line_item[14] == "C3":
-                        C3_PID += 1
+                        break
                     elif customer_line_item[14] == "EMBRANE":
                         EMBRANE_PID += 1
-                    elif customer_line_item[14] == "TETR":
-                        TETR_PID += 1
+                        break
 
             #Get the next bookings line item
             rec_cnt = rec_cnt + 1
@@ -226,3 +225,7 @@ def create_master_customer_data():
     #Clean up and Close out
     cnx.close()
     cnx1.close()
+
+
+
+create_master_customer_data()
