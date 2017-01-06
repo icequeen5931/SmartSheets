@@ -152,3 +152,7 @@ def prep_sql():
     cnx.commit()
 
     cnx.close()
+
+
+if __name__ == "__main__":
+    prep_sql()

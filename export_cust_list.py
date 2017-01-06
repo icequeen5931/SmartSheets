@@ -5,7 +5,6 @@ from my_functions import stamp_it
 import os
 from settings import app,database
 
-
 def export_cust_list(cust_seg,sales_level):
 
 	download_file = app['DOWNLOAD_FILE']
@@ -82,22 +81,21 @@ def export_cust_list(cust_seg,sales_level):
 	cnx.close()
 
 
-
-
-#Level 1
-# export_cust_list('Global Enterprise Theatre','1')
-#export_cust_list('GLOBAL SERVICE PROVIDER','1')
-# export_cust_list('APJ','1')
-# export_cust_list('Corp Adjustment','1')
-# export_cust_list('EMEAR-REGION','1')
-# export_cust_list('GREATER_CHINA','1')
-#
-# #Level 2
-export_cust_list('*','*')
-#export_cust_list('US COMMERCIAL','2')
-export_cust_list('US PS Market Segment','2')
-# export_cust_list('GLOBAL ENTERPRISE SEGMENT','2')
-#export_cust_list('US ENTERPRISE','2')
+if __name__ == "__main__":
+	#Level 1
+	# export_cust_list('Global Enterprise Theatre','1')
+	#export_cust_list('GLOBAL SERVICE PROVIDER','1')
+	# export_cust_list('APJ','1')
+	# export_cust_list('Corp Adjustment','1')
+	# export_cust_list('EMEAR-REGION','1')
+	# export_cust_list('GREATER_CHINA','1')
+	#
+	# #Level 2
+	export_cust_list('*','*')
+	#export_cust_list('US COMMERCIAL','2')
+	export_cust_list('US PS Market Segment','2')
+	#export_cust_list('GLOBAL ENTERPRISE SEGMENT','2')
+	#export_cust_list('US ENTERPRISE','2')
 
 
 

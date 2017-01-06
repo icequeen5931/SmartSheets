@@ -4,7 +4,6 @@ import mysql.connector
 from settings import database
 
 class Coverage:
-
     def __init__(self):
         # Load Values and Init Object
         cnx = mysql.connector.connect(user=database['USER'],
@@ -54,3 +53,7 @@ class Coverage:
         self.team = [pss,tsa]
 
         return(self.team)
+
+if __name__ == "__main__":
+    jim = Coverage()
+    print (jim)
