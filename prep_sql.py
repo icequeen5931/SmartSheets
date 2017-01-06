@@ -120,6 +120,12 @@ def prep_sql():
     mycursor.execute(sql)
     cnx.commit()
 
+    #Add an index to speed customer lookups
+    sql= ("ALTER TABLE  `master_bookings_data` "
+                "ADD INDEX `cust` (`End Customer Global Ultimate Name`(75) ASC)")
+    mycursor.execute(sql)
+    cnx.commit()
+
     #Make a duplicate for todays data
     #
     sql= "CREATE TABLE todays_bookings_data LIKE master_bookings_data;"

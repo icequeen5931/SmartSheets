@@ -8,6 +8,9 @@ from datetime import datetime
 from datetime import date
 
 def create_cust_data():
+    start_time = datetime.now()
+    print ('\tcreate_cust_data started: ',datetime.now())
+
     #Create 2 mySQL connections
     cnx = mysql.connector.connect(user=database['USER'], password=database['PASSWORD'], host=database['HOST'],
                                   database=database['DATABASE'])
@@ -21,11 +24,11 @@ def create_cust_data():
     if table_exists(mycursor, 'master_customer_data'):
         mycursor.execute("SELECT COUNT(*) FROM master_customer_data")
         current_customers = mycursor.fetchone()
-        print("Master Customer Data: ", current_customers[0])
+        print("\t\tMaster Customer Data: ", current_customers[0])
 
         sql = "DROP TABLE master_customer_data"
         mycursor.execute(sql)
-        print("Deleted OLD Master Customer Data...")
+        print("\t\tDeleted OLD Master Customer Data...")
         cnx.commit()
 
     sql = ('CREATE TABLE master_customer_data ('
@@ -76,13 +79,12 @@ def create_cust_data():
     mycursor.execute(sql)
     customers = mycursor.fetchall()
 
-    print ("Customers Found: ",len(customers))
+    print ("\t\tCustomers Found: ",len(customers))
 
     # Create a the Team Coverage Object
     my_coverage = Coverage()
 
     progress = 0
-    print ('start',datetime.now())
     for customer in customers:
 
         #Gather this customers orders
@@ -91,11 +93,6 @@ def create_cust_data():
         query_values = (customer)
         mycursor.execute(sql,query_values)
         orders = mycursor.fetchall()
-
-        # print('================================')
-        # for order in orders:
-        #     print (order[16], order[4])
-        # time.sleep(1)
 
         # Init per customer counters and variables
         n9300_PID = 0
@@ -128,7 +125,6 @@ def create_cust_data():
             elif order[14] == "C3":
                 C3_PID += 1
             elif prod_id_dict.get(order[15]) is not None:
-                #print('FOUND  Product ID: ',order[15])
                 if prod_id_dict[order[15]][0] == 'N9300':
                     n9300_PID += 1
                 elif prod_id_dict[order[15]][0] == 'N9500':
@@ -219,13 +215,15 @@ def create_cust_data():
         #Show progress for every 1000 customers processed
         progress = progress + 1
         if progress % 1000 == 0:
-            print("\t Customers Processed: ", progress)
+            print("\t\t Customers Processed: ", progress)
 
     #Clean up and Close out
     cnx.close()
     cnx1.close()
-    print('Done !', datetime.now())
 
+    end_time = datetime.now()
+    print ('\t\trun time: ',end_time - start_time)
+    print ('\tcreate_cust_data module complete: ',datetime.now())
 
 
 if __name__ == "__main__":

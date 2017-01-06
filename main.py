@@ -6,11 +6,15 @@ from settings import app,database
 from prep_sql import prep_sql
 from create_cust_data import create_cust_data
 from export_cust_list import export_cust_list
+from datetime import datetime
 
 def main():
     #
     # Main()
     #
+
+    start_time = datetime.now()
+    print ('main() started: ',datetime.now())
 
     download_file = app['DOWNLOAD_FILE']
     download_dir = app['DOWNLOAD_DIR']
@@ -26,10 +30,10 @@ def main():
         stamp_it(download_dir+download_file,as_of_date)
     else:
         print()
-        print('Bookings Data not yet downloaded. Please download current copy !')
+        print('\tBookings Data not yet downloaded. Please download current copy !')
 
     #Convert xls bookings file to CVS
-    print("Processing NEW Bookings Data...")
+    print("\tProcessing NEW Bookings Data...")
     csv_from_excel(working_dir+working_data_dir+working_file,'Data')
     #Stamp it and save it
     stamp_it(working_dir + working_data_dir + working_file, as_of_date)
@@ -43,7 +47,15 @@ def main():
     create_cust_data()
 
     #Now we can export the new customer list as a CSV
-    export_cust_list()
+    export_cust_list('*', '*')
+    export_cust_list('US COMMERCIAL', '2')
+    export_cust_list('US PS Market Segment', '2')
+    export_cust_list('GLOBAL ENTERPRISE SEGMENT', '2')
+    export_cust_list('US ENTERPRISE', '2')
+
+    end_time = datetime.now()
+    print ('run time: ',end_time - start_time)
+    print ('main module complete: ',datetime.now())
 
 
 if __name__ == "__main__":
