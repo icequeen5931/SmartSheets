@@ -6,7 +6,7 @@ from settings import app,database
 from Coverage import Coverage
 from datetime import datetime
 from datetime import date
-import time
+
 
 cnx = mysql.connector.connect(user=database['USER'], password=database['PASSWORD'], host=database['HOST'],
                               database=database['DATABASE'])
@@ -69,8 +69,6 @@ prod_fam_dict ={}
 for product in products:
     prod_id_dict[product[1]] = (product[0],product[2])
     prod_fam_dict[product[0]]= (product[1],product[2])
-print(prod_fam_dict.keys())
-print(prod_id_dict)
 
 #Get each unique Customer Name
 sql = ('SELECT DISTINCT `End Customer Global Ultimate Name` FROM `master_bookings_data`'
@@ -84,14 +82,21 @@ print ("Customers Found: ",len(customers))
 # Create a the Team Coverage Object
 my_coverage = Coverage()
 
+progress = 0
 print ('start',datetime.now())
 for customer in customers:
 
     #Gather this customers orders
-    sql = "SELECT * FROM `master_bookings_data` WHERE `End Customer Global Ultimate Name` = %s"
+    sql = ("SELECT * FROM `master_bookings_data` WHERE `End Customer Global Ultimate Name` = %s "
+                "ORDER BY `Date Booked` ASC")
     query_values = (customer)
     mycursor.execute(sql,query_values)
     orders = mycursor.fetchall()
+
+    # print('================================')
+    # for order in orders:
+    #     print (order[16], order[4])
+    # time.sleep(1)
 
     # Init per customer counters and variables
     n9300_PID = 0
@@ -146,8 +151,8 @@ for customer in customers:
 
         #Find the team(s) that cover this customer in this territory
         teams = my_coverage.find_team(sales_str)
-        pss = pss + ' '.join(teams[0])
-        tsa = tsa + ' '.join(teams[1])
+        pss = ' '.join(teams[0])
+        tsa = ' '.join(teams[1])
 
     # We are done with this customer
     # Create a summary customer record
@@ -212,51 +217,17 @@ for customer in customers:
     mycursor1.execute(sql)
     cnx1.commit()
 
-    #print('\t\t Customer: ',order[16])
-    # print('\t\t\t\t Team: ',pss,' / ',tsa)
-    # print('\t\t\t\t\t Region:',sales_str)
-    # print('\t\t Products:',n9300_PID,n9500_PID,APIC_PID,EMBRANE_PID,C3_PID,TETR_PID)
-    #print('========================================')
-    #time.sleep(1)
+    #Show progress for every 1000 customers processed
+    progress = progress + 1
+    if progress % 1000 == 0:
+        print("Customers Processed: ", progress)
 
 #Clean up and Close out
 cnx.close()
 cnx1.close()
-
-print('done !', datetime.now())
-
+print('Done !', datetime.now())
 
 
 
-# Loop through each of the master_bookings_data table
-# Load the first customer line item
-#customer_line_item = mycursor.fetchone()
-#
-# progress = 0
-# rec_cnt = 0
-# print ("start")
-# while customer_line_item is not None:
-#     # Init per customer counters and variables
-#     current_customer = customer_line_item[16]
-#     current_customer_id = customer_line_item[17]
-#     first_date_booked = customer_line_item[4]
-#     account_mgr = customer_line_item[11]
-#     sales_lv1 = customer_line_item[5]
-#     sales_lv2 = customer_line_item[6]
-#     sales_lv3 = customer_line_item[7]
-#     sales_lv4 = customer_line_item[8]
-#     sales_lv5 = customer_line_item[9]
-#     n9300_PID = 0
-#     n9500_PID = 0
-#     APIC_PID = 0
-#     C3_PID = 0
-#     EMBRANE_PID = 0
-#     TETR_PID = 0
-#
-#     print(rec_cnt,current_customer,'\t\t',sales_lv1,sales_lv2,sales_lv3,sales_lv4,sales_lv5)
-#     time.sleep(.25)
-#
-#     rec_cnt = rec_cnt+1
-#     customer_line_item = mycursor.fetchone()
-#
-# print ("Done !")
+if __name__ == "__main__":
+    pass
