@@ -47,11 +47,15 @@ def main():
     create_cust_data()
 
     #Now we can export the new customer list as a CSV
-    export_cust_list('*', '*')
-    export_cust_list('US COMMERCIAL', '2')
-    export_cust_list('US PS Market Segment', '2')
-    export_cust_list('GLOBAL ENTERPRISE SEGMENT', '2')
-    export_cust_list('US ENTERPRISE', '2')
+    # Create a list of territories to export
+    customer_lists = [('*', '*'),
+                      ('US COMMERCIAL', '2'),
+                      ('US PS Market Segment', '2'),
+                      ('GLOBAL ENTERPRISE SEGMENT', '2'),
+                      ('US ENTERPRISE', '2'),
+                      ('APJ', '1')]
+
+    export_cust_list(customer_lists)
 
     end_time = datetime.now()
     print ('run time: ',end_time - start_time)

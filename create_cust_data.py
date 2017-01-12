@@ -12,12 +12,16 @@ def create_cust_data():
     print ('\tcreate_cust_data started: ',datetime.now())
 
     #Create 2 mySQL connections
-    cnx = mysql.connector.connect(user=database['USER'], password=database['PASSWORD'], host=database['HOST'],
+    cnx = mysql.connector.connect(user=database['USER'],
+                                  password=database['PASSWORD'],
+                                  host=database['HOST'],
                                   database=database['DATABASE'])
     mycursor = cnx.cursor()
 
-    cnx1 = mysql.connector.connect(user=database['USER'], password=database['PASSWORD'], host=database['HOST'],
-                                  database=database['DATABASE'])
+    cnx1 = mysql.connector.connect(user=database['USER'],
+                                   password=database['PASSWORD'],
+                                   host=database['HOST'],
+                                   database=database['DATABASE'])
     mycursor1 = cnx1.cursor()
 
     #Delete and re-create master customer data as required
